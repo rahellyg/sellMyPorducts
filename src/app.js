@@ -1,8 +1,17 @@
 'use strict';
 
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 
 const SLUG_PATTERN = /^[a-z0-9-]{3,50}$/;
+
+// Guard every API route against abuse/brute-force with a shared limiter.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 function getOrCreateUser(db, username) {
   if (typeof username !== 'string' || !username.trim()) {
@@ -24,6 +33,7 @@ function createApp(db) {
   const app = express();
   app.use(express.json());
   app.use(express.static(require('path').join(__dirname, '..', 'public')));
+  app.use('/api', apiLimiter);
 
   // Create a user (or fetch the existing one) so every shopper can
   // participate without a heavyweight auth system.

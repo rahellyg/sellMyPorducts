@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>המוצרים שלי</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="page-header">
+    <h1>המוצרים שלי</h1>
+    <p>כל המוצרים שהזמנתם ומוכנים לביקורת.</p>
+  </header>
+
+  <main class="page-shell">
+    <section class="card" id="identity">
+      <h2>שם משתמש</h2>
+      <div class="user-row">
+        <input id="username" type="text" placeholder="למשל: dana123" />
+        <button id="show-products-btn" class="primary-btn" type="button">הצג מוצרים</button>
+      </div>
+      <div class="import-box">
+        <h3>ייבוא המוצרים שלי מ-Temu</h3>
+        <p>ייפתח חלון Temu. התחברו שם בעצמכם, פתחו את רשימת ההזמנות ואז אשרו את הייבוא כאן.</p>
+        <div class="import-actions">
+          <button id="start-temu-btn" class="secondary-btn" type="button">פתח Temu</button>
+          <button id="complete-temu-btn" class="primary-btn" type="button" disabled>ייבא את המוצרים</button>
+        </div>
+        <p id="import-status" class="import-status"></p>
+      </div>
+    </section>
+
+    <section class="card" id="products">
+      <h2>המוצרים שהזמנתי</h2>
+      <div id="product-list" class="product-grid"></div>
+    </section>
+
+    <section class="card" id="reviews">
+      <h2>כתבו חוות דעת</h2>
+      <form id="review-form">
+        <p class="selected-product">מוצר נבחר: <strong id="selected-product-name">לא נבחר</strong></p>
+        <label class="field-label">דירוג (1-5)
+          <input id="review-rating" type="number" min="1" max="5" required />
+        </label>
+        <label class="field-label">חוות דעת
+          <textarea id="review-body" required></textarea>
+        </label>
+        <button type="submit" class="primary-btn">פרסם ביקורת</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

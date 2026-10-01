@@ -3,66 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>sellMyProducts - חוות דעת משותפות</title>
+  <title>המוצרים שלי</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>sellMyProducts</h1>
-    <p>רשמו את ההזמנות שלכם מכל האתרים (Temu, Shein ועוד), כתבו חוות דעת אמיתית ושתפו עם כולם.</p>
+  <header class="page-header">
+    <h1>המוצרים שלי</h1>
+    <p>כל המוצרים שהזמנתם ומוכנים לביקורת.</p>
   </header>
 
-  <main>
-    <section id="identity">
-      <h2>1. מי אתם?</h2>
-      <label>שם משתמש <input id="username" type="text" placeholder="לדוגמה: dana123" /></label>
+  <main class="page-shell">
+    <section class="card" id="identity">
+      <h2>שם משתמש</h2>
+      <div class="user-row">
+        <input id="username" type="text" placeholder="למשל: dana123" />
+        <button id="show-products-btn" class="primary-btn" type="button">הצג מוצרים</button>
+      </div>
+      <div class="import-box">
+        <h3>ייבוא המוצרים שלי מ-Temu</h3>
+        <p>ייפתח חלון Temu. התחברו שם בעצמכם, פתחו את רשימת ההזמנות ואז אשרו את הייבוא כאן.</p>
+        <div class="import-actions">
+          <button id="start-temu-btn" class="secondary-btn" type="button">פתח Temu</button>
+          <button id="complete-temu-btn" class="primary-btn" type="button" disabled>ייבא את המוצרים</button>
+        </div>
+        <p id="import-status" class="import-status"></p>
+      </div>
     </section>
 
-    <section id="orders">
-      <h2>2. הוסיפו הזמנה</h2>
-      <form id="order-form">
-        <label>אתר <input id="order-site" type="text" placeholder="Temu / Shein / ..." required /></label>
-        <label>שם מוצר <input id="order-product" type="text" required /></label>
-        <label>תאריך הזמנה <input id="order-date" type="date" /></label>
-        <label>קישור להזמנה <input id="order-url" type="url" /></label>
-        <button type="submit">הוסף הזמנה</button>
-      </form>
-      <ul id="order-list"></ul>
+    <section class="card" id="products">
+      <h2>המוצרים שהזמנתי</h2>
+      <div id="product-list" class="product-grid"></div>
     </section>
 
-    <section id="reviews">
-      <h2>3. כתבו חוות דעת</h2>
+    <section class="card" id="reviews">
+      <h2>כתבו חוות דעת</h2>
       <form id="review-form">
-        <label>בחרו הזמנה
-          <select id="review-order"></select>
-        </label>
-        <label>דירוג (1-5)
+        <p class="selected-product">מוצר נבחר: <strong id="selected-product-name">לא נבחר</strong></p>
+        <label class="field-label">דירוג (1-5)
           <input id="review-rating" type="number" min="1" max="5" required />
         </label>
-        <label>חוות דעת
+        <label class="field-label">חוות דעת
           <textarea id="review-body" required></textarea>
         </label>
-        <button type="submit">פרסם חוות דעת</button>
+        <button type="submit" class="primary-btn">פרסם ביקורת</button>
       </form>
-    </section>
-
-    <section id="feed">
-      <h2>4. חוות דעת מכל המשתמשים</h2>
-      <button id="refresh-feed">רענן</button>
-      <ul id="review-feed"></ul>
-    </section>
-
-    <section id="affiliate">
-      <h2>5. דף affiliate משלכם</h2>
-      <form id="affiliate-form">
-        <label>כתובת ייחודית (slug)
-          <input id="affiliate-slug" type="text" pattern="[a-z0-9-]{3,50}" required />
-        </label>
-        <label>כותרת <input id="affiliate-headline" type="text" /></label>
-        <label><input id="affiliate-paid" type="checkbox" /> דף פרימיום בתשלום</label>
-        <button type="submit">צור/עדכן דף</button>
-      </form>
-      <p id="affiliate-result"></p>
     </section>
   </main>
 

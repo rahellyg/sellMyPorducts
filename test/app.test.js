@@ -28,11 +28,53 @@ async function request(baseUrl, path, options) {
   return { status: res.status, body };
 }
 
+test('product flow: list saved products and review one at a time', async (t) => {
+  const { server, baseUrl } = await startServer();
+  t.after(() => server.close());
+
+  const productRes = await request(baseUrl, '/api/products', {
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'dana',
+      site: 'Temu',
+      productName: 'Wireless earbuds',
+      price: 39.99,
+      productImage: 'https://example.com/earbuds.jpg',
+      productUrl: 'https://example.com/earbuds',
+    }),
+  });
+  assert.equal(productRes.status, 201);
+  assert.equal(productRes.body.product_name, 'Wireless earbuds');
+
+  const productsList = await request(baseUrl, '/api/products/dana');
+  assert.equal(productsList.status, 200);
+  assert.equal(productsList.body.length, 1);
+  assert.equal(productsList.body[0].site, 'Temu');
+  assert.equal(productsList.body[0].price, 39.99);
+
+  const reviewRes = await request(baseUrl, '/api/reviews', {
+    method: 'POST',
+    body: JSON.stringify({
+      username: 'dana',
+      productId: productRes.body.id,
+      rating: 5,
+      body: 'Great sound quality!',
+    }),
+  });
+  assert.equal(reviewRes.status, 201);
+
+  const feed = await request(baseUrl, '/api/reviews');
+  assert.equal(feed.status, 200);
+  assert.equal(feed.body[0].product_name, 'Wireless earbuds');
+
+  const productWithRating = await request(baseUrl, '/api/products/dana');
+  assert.equal(productWithRating.body[0].rating, 5);
+});
+
 test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) => {
   const { server, baseUrl } = await startServer();
   t.after(() => server.close());
 
-  // A user can register and add an order imported from any site.
   const orderRes = await request(baseUrl, '/api/orders', {
     method: 'POST',
     body: JSON.stringify({
@@ -44,12 +86,10 @@ test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) =
   assert.equal(orderRes.status, 201);
   assert.equal(orderRes.body.site, 'Temu');
 
-  // Listing orders for that user returns what was added.
   const ordersList = await request(baseUrl, '/api/orders/dana');
   assert.equal(ordersList.status, 200);
   assert.equal(ordersList.body.length, 1);
 
-  // The user can write a genuine review for their own order.
   const reviewRes = await request(baseUrl, '/api/reviews', {
     method: 'POST',
     body: JSON.stringify({
@@ -61,7 +101,6 @@ test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) =
   });
   assert.equal(reviewRes.status, 201);
 
-  // Another user cannot review someone else's order.
   const otherUserOrder = await request(baseUrl, '/api/orders', {
     method: 'POST',
     body: JSON.stringify({ username: 'yossi', site: 'Shein', productName: 'T-shirt' }),
@@ -77,7 +116,6 @@ test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) =
   });
   assert.equal(forbiddenReview.status, 403);
 
-  // The shared/collaborative feed shows reviews from every user.
   await request(baseUrl, '/api/reviews', {
     method: 'POST',
     body: JSON.stringify({
@@ -93,7 +131,6 @@ test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) =
   const usernames = feed.body.map((r) => r.username).sort();
   assert.deepEqual(usernames, ['dana', 'yossi']);
 
-  // A user can create a paid affiliate page and view it publicly.
   const affiliateRes = await request(baseUrl, '/api/affiliate', {
     method: 'POST',
     body: JSON.stringify({
@@ -111,7 +148,6 @@ test('full flow: orders, reviews, shared feed, and affiliate pages', async (t) =
   assert.equal(publicPage.body.username, 'dana');
   assert.equal(publicPage.body.reviews.length, 1);
 
-  // Slugs cannot be stolen by other users.
   const slugConflict = await request(baseUrl, '/api/affiliate', {
     method: 'POST',
     body: JSON.stringify({ username: 'yossi', slug: 'dana-reviews' }),

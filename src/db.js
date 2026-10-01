@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
@@ -10,6 +11,10 @@ const Database = require('better-sqlite3');
  */
 function createDatabase(filename) {
   const dbPath = filename || path.join(__dirname, '..', 'data', 'app.db');
+  const dbDir = path.dirname(dbPath);
+  if (dbDir && dbDir !== '.' && !fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
   const db = new Database(dbPath);
 
   db.pragma('journal_mode = WAL');
@@ -18,6 +23,19 @@ function createDatabase(filename) {
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      site TEXT NOT NULL,
+      product_name TEXT NOT NULL,
+      order_date TEXT,
+      order_url TEXT,
+      product_url TEXT,
+      product_image TEXT,
+      price REAL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -33,7 +51,8 @@ function createDatabase(filename) {
 
     CREATE TABLE IF NOT EXISTS reviews (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      order_id INTEGER NOT NULL REFERENCES orders(id),
+      order_id INTEGER REFERENCES orders(id),
+      product_id INTEGER REFERENCES products(id),
       user_id INTEGER NOT NULL REFERENCES users(id),
       rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
       body TEXT NOT NULL,
@@ -49,6 +68,18 @@ function createDatabase(filename) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+
+  try {
+    db.prepare('SELECT product_id FROM reviews LIMIT 1').get();
+  } catch (err) {
+    db.exec('ALTER TABLE reviews ADD COLUMN product_id INTEGER REFERENCES products(id)');
+  }
+
+  try {
+    db.prepare('SELECT price FROM products LIMIT 1').get();
+  } catch (err) {
+    db.exec('ALTER TABLE products ADD COLUMN price REAL');
+  }
 
   return db;
 }
